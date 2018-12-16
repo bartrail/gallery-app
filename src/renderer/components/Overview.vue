@@ -1,6 +1,12 @@
 <template>
   <div>
     <button @click="setRootPath">Open</button>
+    <p>
+      <input type="checkbox" v-model="includeSubDirs"> Include sub directories
+    </p>
+    <p>
+      Amount: <strong>{{ files.length }}</strong>
+    </p>
     <ul>
       <li v-for="file in files">{{ file }}</li>
     </ul>
@@ -8,7 +14,10 @@
 </template>
 
 <script>
-  const fs = require('fs')
+  import { isArray, isString } from 'lodash'
+
+  const {resolve} = require('path')
+  const {readdir, stat} = require('fs').promises
   const {dialog} = require('electron').remote
 
   /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////// ///
@@ -20,6 +29,7 @@
     data () {
       return {
         rootPath: null,
+        includeSubDirs: false,
         files: []
       }
     },
@@ -29,19 +39,34 @@
           properties: ['openDirectory']
         })
 
-        this.rootPath = path[0]
-        this.scanDirectory()
+        if (isArray(path) && isString(path[0])) {
+          this.rootPath = path[0]
+          this.scanDirectory()
+        }
       },
       scanDirectory () {
-        this.files = []
-        fs.readdir(this.rootPath, (err, dir) => {
-          if (err) {
+        var includeSubDirs = this.includeSubDirs
 
-          } else {
-            dir.forEach((path, idx) => {
-              this.files.push(path)
-            })
-          }
+        async function getFiles (dir) {
+          const subdirs = await readdir(dir)
+          const files = await Promise.all(
+            subdirs.map(
+              async (subdir) => {
+                const res = resolve(dir, subdir)
+                console.log(includeSubDirs)
+                if (includeSubDirs) {
+                  return (await stat(res)).isDirectory() ? getFiles(res) : res
+                } else {
+                  return (await stat(res)).isDirectory() ? [] : res
+                }
+              }
+            )
+          )
+          return Array.prototype.concat(...files)
+        }
+
+        getFiles(this.rootPath).then((files) => {
+          this.files = files
         })
       }
     },

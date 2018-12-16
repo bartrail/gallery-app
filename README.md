@@ -22,5 +22,25 @@ npm test
 npm run lint
 
 ```
+## Todo v1 (in no particular order)
+
+- Open Directory
+- Open Directories Recursive
+- Nice UI
+- Visual Overview of currently active Images
+  - Generate Thumbnails
+- Keyboard Control for Next/Prev
+- Open File directly (allow next/prev image)
+- UI Control for Next/Prev
+- Drag'n'Drop support
+  - For Directories
+  - For Files
+- Select multiple Files/Subdirectories from Directory
+- Smooth Animations between Images
+- Video Support
+- Watch currently opened directory
+- Automated Slideshow
+- Allow Control while Slideshow is running
+- Change Slideshow Duration while Slideshow is running (using Keyboard +/- ?)
 
 ---
